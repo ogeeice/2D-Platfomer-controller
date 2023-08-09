@@ -1,5 +1,7 @@
 extends KinematicBody2D
 
+export var NewJump = false
+
 var snap = Vector2.DOWN
 const UP_DIRECTION = Vector2.UP
 
@@ -11,7 +13,16 @@ export (float, 0, 1) var DeccSpeed = 0.1
 var canJump = false
 var jump_count = 0
 export var jump_max = 2
+
 export var Jump_strength = 1500.0
+
+export var Jump_Height = 200.0
+export var Jump_Time_peak = 0.05
+export var Jump_Time_Descend = 0.3
+
+onready var Jump_Velocity : float = ((2.0 * Jump_Height) / Jump_Time_Descend) * -1.0
+onready var Jump_Gravity : float = ((-2.0 * Jump_Height) / (Jump_Time_Descend * Jump_Time_Descend)) * -1.0
+onready var Fall_Gravity : float = ((-2.0 * Jump_Height) / (Jump_Time_Descend * Jump_Time_Descend)) * -1.0
 
 export (float, 0, 1) var coyoteTime = 0.1
 onready var CTimer = get_node("CoyoteTimer")
@@ -25,7 +36,10 @@ func _ready():
 
 
 func _physics_process(delta):
-	velocity.y += gravity * delta
+	if NewJump == true:
+		velocity.y += GetGravity() * delta
+	else:
+		velocity.y += gravity * delta
 	velocity = move_and_slide_with_snap(velocity,snap,UP_DIRECTION,true)
 
 func _process(_delta):
@@ -61,9 +75,20 @@ func Locomotion():
 	if canJump:
 		if jump_count < jump_max:
 			if Input.is_action_just_pressed("jump"):
-				velocity.y = -Jump_strength
-				snap = Vector2.ZERO
-				jump_count += 1
+				Jump()
+
+func Jump():
+	if NewJump == true:
+		velocity.y = Jump_Velocity
+	else:
+		velocity.y = -Jump_strength
+	
+	snap = Vector2.ZERO
+	jump_count += 1
+	pass
+
+func GetGravity():
+	return Jump_Gravity if velocity.y < 0.0 else Fall_Gravity
 
 func _on_CoyoteTimer_timeout():
 	canJump = false

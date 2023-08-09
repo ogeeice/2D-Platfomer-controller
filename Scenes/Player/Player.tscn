@@ -8,6 +8,7 @@ extents = Vector2( 32, 32 )
 
 [node name="Player" type="KinematicBody2D"]
 script = ExtResource( 2 )
+NewJump = true
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
 shape = SubResource( 1 )
